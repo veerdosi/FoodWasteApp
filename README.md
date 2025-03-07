@@ -1,2 +1,0 @@
-# FoodWasteApp
- AB1601
