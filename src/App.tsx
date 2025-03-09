@@ -69,6 +69,7 @@ const restaurants = [
   }
 ];
 
+
 // Screen Components
 const HomeScreen = () => (
   <div className="space-y-6">
@@ -91,17 +92,6 @@ const HomeScreen = () => (
       <p className="text-sm text-gray-600">Steamed Chicken Rice (No cucumber)</p>
       <p className="text-sm text-gray-600">Order number: 116</p>
       <p className="text-sm text-gray-600">Waiting time: 5 minutes</p>
-    </div>
-
-    {/* Closing Discount Section */}
-    <div className="bg-gray-50 rounded-2xl p-4">
-      <h3 className="font-semibold">Closing Discount</h3>
-      <p className="text-sm text-gray-600">
-        Steamed Chicken Rice &nbsp;
-        <span className="line-through text-red-500">$4</span>
-        &nbsp;
-        <span className="font-bold text-green-600">$3.50</span>
-      </p>
     </div>
 
     {/* Quick Stats */}
@@ -170,7 +160,11 @@ const HomeScreen = () => (
   </div>
 );
 
-const OrderScreen = () => {
+interface OrderScreenProps {
+  onNavigate: (screen: string) => void;
+}
+
+const OrderScreen: React.FC<OrderScreenProps> = ({ onNavigate }) => {
   const [selectedCuisine, setSelectedCuisine] = useState('All');
   const cuisines = ['All', 'Asian', 'Western', 'Japanese', 'Indian', 'Vegetarian', 'Halal'];
 
@@ -206,20 +200,15 @@ const OrderScreen = () => {
         ))}
       </div>
 
-      {/* Featured Promotion */}
-      <div className="relative rounded-2xl overflow-hidden h-40">
-        <img
-          src="https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-          alt="Promotion"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
-          <div className="text-white">
-            <p className="text-sm font-semibold">Limited Time Offer</p>
-            <h3 className="text-xl font-bold">20% Off Green Restaurants</h3>
-            <p className="text-sm opacity-80">Sustainable dining rewards</p>
-          </div>
-        </div>
+      {/* Closing Discount Section */}
+      <div className="bg-gray-50 rounded-2xl p-4">
+        <h3 className="font-semibold">Closing Discount</h3>
+        <p className="text-sm text-gray-600">
+          Steamed Chicken Rice &nbsp;
+          <span className="line-through text-red-500">$4</span>
+          &nbsp;
+          <span className="font-bold text-green-600">$3.50</span>
+        </p>
       </div>
 
       {/* Restaurant List */}
@@ -261,12 +250,18 @@ const OrderScreen = () => {
 
               <div className="flex gap-2">
                 {restaurant.featured.map((item, index) => (
-                  <span 
+                  <button
                     key={index}
+                    onClick={() => {
+                      if (item === 'Chicken Rice') {
+                        // This calls App's setActiveScreen('customize')
+                        onNavigate('customize');
+                      }
+                    }}
                     className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
                   >
                     {item}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -486,15 +481,34 @@ const CommunityScreen = () => {
   );
 };
 
+const LanguageSelector = () => {
+  const [language, setLanguage] = useState('English');
+  return (
+    <div className="flex items-center justify-between p-4 bg-white rounded-2xl my-4">
+      <span className="text-gray-700">Language</span>
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        className="border border-gray-200 p-1 rounded"
+      >
+        <option value="English">English</option>
+        <option value="Mandarin">Mandarin</option>
+        <option value="Tamil">Tamil</option>
+        <option value="Malay">Malay</option>
+      </select>
+    </div>
+  );
+};
+
 const ProfileScreen = () => (
   <div className="space-y-6">
     {/* Profile Header */}
-      <div className="text-center">
-        <img 
-          src="/johndoe.jpeg"
-          alt="John Doe Profile Picture"
-          className="w-32 h-32 mx-auto mb-4 rounded-full object-cover"
-        />
+    <div className="text-center">
+      <img 
+        src="/johndoe.jpeg"
+        alt="John Doe Profile Picture"
+        className="w-32 h-32 mx-auto mb-4 rounded-full object-cover"
+      />
       <h2 className="text-xl font-bold">John Doe</h2>
       <p className="text-gray-600">Eco Warrior Level 5</p>
     </div>
@@ -534,8 +548,54 @@ const ProfileScreen = () => (
         </button>
       ))}
     </div>
+    <LanguageSelector />
   </div>
 );
+
+
+const RewardScreen = () => {
+  // For demo, initializing with 100 available credits.
+  const [credits, setCredits] = useState(100);
+  const [sliderValue, setSliderValue] = useState(0);
+  
+  // Conversion rate: 50 credits = $1
+  const moneyValue = (sliderValue / 50).toFixed(2);
+
+  return (
+    <div className="space-y-6 p-4">
+      <h2 className="text-2xl font-bold">Point Reward System</h2>
+      <div className="bg-gray-50 rounded-2xl p-4">
+        <p className="text-sm font-medium mb-2">Food Waste to Credits:</p>
+        <ul className="list-disc ml-5 text-sm">
+          <li>0-10g food waste: 5 credits</li>
+          <li>10-20g food waste: 3 credits</li>
+          <li>&gt;20g food waste: 1 credit</li>
+          <li>50 credits = $1</li>
+        </ul>
+      </div>
+      <div className="bg-white rounded-2xl p-4">
+        <label htmlFor="creditSlider" className="block text-sm font-medium text-gray-700">
+          Convert Credits to Money
+        </label>
+        <input
+          id="creditSlider"
+          type="range"
+          min="0"
+          max={credits}
+          value={sliderValue}
+          onChange={(e) => setSliderValue(Number(e.target.value))}
+          className="w-full mt-2"
+        />
+        <p className="text-sm text-gray-600 mt-2">
+          Converting {sliderValue} credits to ${moneyValue}
+        </p>
+        <button className="mt-4 w-full bg-green-600 text-white py-2 rounded-xl">
+          Redeem Now
+        </button>
+      </div>
+    </div>
+  );
+};
 
 function App() {
   const [activeScreen, setActiveScreen] = useState('home');
@@ -546,7 +606,7 @@ function App() {
       case 'home':
         return <HomeScreen />;
       case 'order':
-        return <OrderScreen />;
+        return <OrderScreen onNavigate={setActiveScreen} />;
       case 'customize':
         return <CustomizationScreen />;
       case 'waste':
@@ -555,6 +615,8 @@ function App() {
         return <CompanionScreen />;
       case 'community':
         return <CommunityScreen />;
+      case 'reward':
+        return <RewardScreen />;
       case 'profile':
         return <ProfileScreen />;
       default:
@@ -587,6 +649,7 @@ function App() {
                activeScreen === 'waste' ? 'Waste Tracking' :
                activeScreen === 'companion' ? 'My Pet' :
                activeScreen === 'community' ? 'Community' :
+               activeScreen === 'reward' ? 'Rewards' :
                'Profile'}
             </h1>
           </div>
@@ -601,7 +664,7 @@ function App() {
         </div>
 
         {/* Main content */}
-        <div className="h-[calc(100%-8rem)] px-6 overflow-y-auto">
+        <div className="h-[calc(100%-8rem)] px-6 pb-24 overflow-y-auto">
           {renderScreen()}
         </div>
 
@@ -646,6 +709,16 @@ function App() {
           >
             <Users className="w-6 h-6" />
             <span className="text-xs mt-1">Community</span>
+          </button>
+          <button 
+            onClick={() => {
+              setActiveTab('reward');
+              setActiveScreen('reward');
+            }}
+            className={`flex flex-col items-center ${activeTab === 'reward' ? 'text-green-600' : 'text-gray-400'}`}
+          >
+            <Award className="w-6 h-6" />
+            <span className="text-xs mt-1">Reward</span>
           </button>
         </div>
       </div>
